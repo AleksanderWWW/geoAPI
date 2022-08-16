@@ -1,1 +1,3 @@
 docs/Assignment.pdf
+venv/
+.env
