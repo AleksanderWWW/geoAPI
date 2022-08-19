@@ -1,5 +1,7 @@
 import os
 
+import requests
+
 from flask import Flask, jsonify, request
 
 from flask_jwt_extended import (
@@ -11,6 +13,7 @@ from flask_jwt_extended import (
 
 from dotenv import load_dotenv
 
+from utils import fetch_ip_data
 
 # Dummy user data base
 USERS = [
@@ -27,6 +30,9 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["APP_SECRET_KEY"]
 
 jwt = JWTManager(app)
+
+# for IP STACK access
+ip_stack_key = os.environ["IP_STACK_KEY"]
 
 
 
@@ -47,5 +53,23 @@ def create_token():
     return jsonify(resp_body), 401
 
 
+@app.route("/status")
+def status():
+    return jsonify({"status": "ok"}), 200
+
+@app.route("/api", methods=["POST"])
+@jwt_required()
+def save_geo_data():
+    # for IP STACK access
+    ip_stack_key = os.environ["IP_STACK_KEY"]
+    ip = request.json.get("ip")
+    data = fetch_ip_data(ip, ip_stack_key)
+    print(data)
+    return jsonify(data)
+    
+
+
+
+
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
