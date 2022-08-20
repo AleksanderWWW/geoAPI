@@ -1,3 +1,4 @@
 docs/Assignment.pdf
 venv/
 .env
+*/__pycache__/*
