@@ -1,25 +1,18 @@
 import os
 
-import requests
+from datetime import timedelta
 
 from flask import Flask, jsonify, request
 
 from flask_jwt_extended import (
     create_access_token,
-    get_jwt_identity,
     jwt_required,
     JWTManager
 )
 
 from dotenv import load_dotenv
 
-from utils import fetch_ip_data
-
-# Dummy user data base
-USERS = [
-    {"username": "test",
-    "password": "test-password"},
-]
+from utils import fetch_ip_data, get_mongo_collection, save_ip_data, verify_user
 
 
 load_dotenv()
@@ -28,11 +21,14 @@ load_dotenv()
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.environ["APP_SECRET_KEY"]
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
 jwt = JWTManager(app)
 
 # for IP STACK access
 ip_stack_key = os.environ["IP_STACK_KEY"]
+geo_api_collection = get_mongo_collection(os.environ["MONGO_CONN_STR"], "Sofomo", "geoAPI")
+users_collection = get_mongo_collection(os.environ["MONGO_CONN_STR"], "Sofomo", "users")
 
 
 
@@ -41,11 +37,11 @@ def create_token():
     username = request.json.get("username")
     password = request.json.get("password")
 
-    for user in USERS:
-        if user["username"] == username and user["password"] == password:
-            access_token = create_access_token(username)
-            return jsonify(access_token=access_token), 200
-
+    verification_flag = verify_user(username, password, users_collection)
+    if verification_flag:
+        access_token = create_access_token(username)
+        return jsonify(access_token=access_token), 200
+    
     resp_body = {
         "msg": "Bad username or password"
     }
@@ -57,15 +53,26 @@ def create_token():
 def status():
     return jsonify({"status": "ok"}), 200
 
+
 @app.route("/api", methods=["POST"])
 @jwt_required()
 def save_geo_data():
-    # for IP STACK access
-    ip_stack_key = os.environ["IP_STACK_KEY"]
-    ip = request.json.get("ip")
+    # parse request for ip address
+    if "ip" in request.args.keys():
+        ip = request.args.get("ip")
+    elif "ip" in request.json.keys():
+        ip = request.json.get("ip")
+    else:
+        return jsonify({"msg": "No IP address supplied"}), 400
+
     data = fetch_ip_data(ip, ip_stack_key)
+
+    
+    resp, code = save_ip_data(data, geo_api_collection)
     print(data)
-    return jsonify(data)
+
+
+    return jsonify(resp), code
     
 
 
