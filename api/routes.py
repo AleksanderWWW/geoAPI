@@ -12,7 +12,7 @@ from flask_jwt_extended import (
 
 from dotenv import load_dotenv
 
-from utils import fetch_ip_data, get_mongo_collection, save_ip_data, verify_user
+from utils import parse_request, fetch_ip_data, get_mongo_collection, save_ip_data, verify_user
 
 
 load_dotenv()
@@ -54,15 +54,13 @@ def status():
     return jsonify({"status": "ok"}), 200
 
 
-@app.route("/api", methods=["POST"])
+@app.route("/api/add", methods=["POST"])
 @jwt_required()
-def save_geo_data():
+def add_geo_data():
     # parse request for ip address
-    if "ip" in request.args.keys():
-        ip = request.args.get("ip")
-    elif "ip" in request.json.keys():
-        ip = request.json.get("ip")
-    else:
+    ip = parse_request(request)
+
+    if not ip:
         return jsonify({"msg": "No IP address supplied"}), 400
 
     data = fetch_ip_data(ip, ip_stack_key)
@@ -71,11 +69,20 @@ def save_geo_data():
     resp, code = save_ip_data(data, geo_api_collection)
     print(data)
 
-
     return jsonify(resp), code
-    
 
 
+@app.route("/api/retrieve", methods=["GET"])
+@jwt_required()
+def get_geo_data():
+    ip = parse_request(request)
+
+    if not ip:
+        return jsonify({"msg": "No IP address supplied"}), 400
+
+    data = fetch_ip_data(ip, ip_stack_key)
+
+    return jsonify(data)
 
 
 if __name__ == "__main__":

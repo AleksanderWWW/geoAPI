@@ -9,7 +9,20 @@ from pymongo.errors import (
 )
 from pymongo.collection import Collection
 
+from flask import Request
+
 import requests
+
+
+def parse_request(request: Request) -> str:
+    if "ip" in request.args.keys():
+        ip = request.args.get("ip")
+    elif "ip" in request.json.keys():
+        ip = request.json.get("ip")
+    else:
+        ip = "" 
+
+    return ip
 
 
 def fetch_ip_data(ip: str, ip_stack_key:str) -> Dict[str, Any]:
@@ -39,7 +52,7 @@ def verify_user(username: str, password: str, users: Collection) -> bool:
     res = users.find(query)
     try:
         user = res.next()
-    except StopIteration:  # query returned no users
+    except StopIteration:  # wrong user name
         return False 
     
     if user["password"] == password:
