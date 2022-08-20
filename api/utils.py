@@ -62,21 +62,38 @@ def verify_user(username: str, password: str, users: Collection) -> bool:
     return False
 
 
+def retrieve_ip_data(ip: str, collection: Collection) -> Dict[str, Any]:
+    query = {"ip": ip}
+    res = collection.find(query, {"_id": 0})
+
+    try:
+        data = res.next()
+        return data
+    except StopIteration:  # no result in data base
+        return {}
+
+
 def save_ip_data(data: Dict[str, Any], collection: Collection) -> Tuple[Dict[str, str], int]:
     response = {"msg": ""}
-    try:
-        collection.insert_one(data)
-        response["msg"] = "Insertion successful"
+    # check if ip already in database
+    ip = data["ip"]
+    if collection.count_documents({"ip": ip}):
+        response["msg"] = f"Data for ip {ip} already present"
         code = 200
-    except DocumentTooLarge:
-        response["msg"] = "Document provided was to large"
-        code = 400
-    except ExecutionTimeout:
-        response["msg"] = "Execution timed out"
-        code = 408
-    except CollectionInvalid:
-        response["msg"] = "Chosen collection is invalid"
-        code = 404
+    else:
+        try:
+            collection.insert_one(data)
+            response["msg"] = "Insertion successful"
+            code = 200
+        except DocumentTooLarge:
+            response["msg"] = "Document provided was to large"
+            code = 400
+        except ExecutionTimeout:
+            response["msg"] = "Execution timed out"
+            code = 408
+        except CollectionInvalid:
+            response["msg"] = "Chosen collection is invalid"
+            code = 404
     
     return response, code
 

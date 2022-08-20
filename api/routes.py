@@ -17,8 +17,8 @@ from api.utils import (
     verify_user,
     parse_request, 
     fetch_ip_data, 
-    get_mongo_collection, 
     save_ip_data,
+    retrieve_ip_data,
     delete_ip_data 
     )
 
@@ -28,16 +28,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.environ["APP_SECRET_KEY"]
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
-
 jwt = JWTManager(app)
-
-# for IP STACK access
-ip_stack_key = os.environ["IP_STACK_KEY"]
-geo_api_collection = get_mongo_collection(os.environ["MONGO_CONN_STR"], "Sofomo", "geoAPI")
-users_collection = get_mongo_collection(os.environ["MONGO_CONN_STR"], "Sofomo", "users")
-
 
 
 @app.route("/token", methods=["POST"])
@@ -45,7 +36,7 @@ def create_token():
     username = request.json.get("username")
     password = request.json.get("password")
 
-    verification_flag = verify_user(username, password, users_collection)
+    verification_flag = verify_user(username, password, app.config["USERS_COLLECTION"])
     if verification_flag:
         access_token = create_access_token(username)
         return jsonify(access_token=access_token), 200
@@ -71,11 +62,10 @@ def add_geo_data():
     if not ip:
         return jsonify({"msg": "No IP address supplied"}), 400
 
-    data = fetch_ip_data(ip, ip_stack_key)
+    data = fetch_ip_data(ip, app.config["IP_STACK_KEY"])
 
     
-    resp, code = save_ip_data(data, geo_api_collection)
-    print(data)
+    resp, code = save_ip_data(data, app.config["GEO_API_COLLECTION"])
 
     return jsonify(resp), code
 
@@ -88,9 +78,15 @@ def get_geo_data():
     if not ip:
         return jsonify({"msg": "No IP address supplied"}), 400
 
-    data = fetch_ip_data(ip, ip_stack_key)
+    data = retrieve_ip_data(ip, app.config["GEO_API_COLLECTION"])
 
-    return jsonify(data)
+    if data:
+        code = 200
+    
+    else:
+        code = 404
+
+    return jsonify(data), code
 
 
 @app.route("/api/delete", methods=["DELETE"])
@@ -101,9 +97,5 @@ def delete_geo_data():
     if not ip:
         return jsonify({"msg": "No IP address supplied"}), 400
 
-    resp, code = delete_ip_data(ip, geo_api_collection)
+    resp, code = delete_ip_data(ip, app.config["GEO_API_COLLECTION"])
     return jsonify(resp), code
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
