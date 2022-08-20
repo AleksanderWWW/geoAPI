@@ -12,7 +12,15 @@ from flask_jwt_extended import (
 
 from dotenv import load_dotenv
 
-from utils import parse_request, fetch_ip_data, get_mongo_collection, save_ip_data, verify_user
+
+from api.utils import (
+    verify_user,
+    parse_request, 
+    fetch_ip_data, 
+    get_mongo_collection, 
+    save_ip_data,
+    delete_ip_data 
+    )
 
 
 load_dotenv()
@@ -83,6 +91,18 @@ def get_geo_data():
     data = fetch_ip_data(ip, ip_stack_key)
 
     return jsonify(data)
+
+
+@app.route("/api/delete", methods=["DELETE"])
+@jwt_required()
+def delete_geo_data():
+    ip = parse_request(request)
+
+    if not ip:
+        return jsonify({"msg": "No IP address supplied"}), 400
+
+    resp, code = delete_ip_data(ip, geo_api_collection)
+    return jsonify(resp), code
 
 
 if __name__ == "__main__":

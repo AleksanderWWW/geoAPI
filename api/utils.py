@@ -80,3 +80,11 @@ def save_ip_data(data: Dict[str, Any], collection: Collection) -> Tuple[Dict[str
     
     return response, code
 
+
+def delete_ip_data(ip: str, collection: Collection) -> Tuple[Dict[str, str], int]:
+    query = {"ip": ip}
+    response = {"msg": ""}
+
+    collection.delete_one(query)
+    response["msg"] = "Deletion successful"
+    return response, 200
