@@ -1,7 +1,3 @@
-import os
-
-from datetime import timedelta
-
 from flask import Flask, jsonify, request
 
 from flask_jwt_extended import (
@@ -9,9 +5,6 @@ from flask_jwt_extended import (
     jwt_required,
     JWTManager
 )
-
-from dotenv import load_dotenv
-
 
 from api.utils import (
     verify_user,
@@ -21,9 +14,6 @@ from api.utils import (
     retrieve_ip_data,
     delete_ip_data 
     )
-
-
-load_dotenv()
 
 
 app = Flask(__name__)
