@@ -54,7 +54,6 @@ def add_geo_data():
 
     data = fetch_ip_data(ip, app.config["IP_STACK_KEY"])
 
-    
     resp, code = save_ip_data(data, app.config["GEO_API_COLLECTION"])
 
     return jsonify(resp), code
