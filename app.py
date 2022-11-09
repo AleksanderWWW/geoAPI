@@ -1,12 +1,10 @@
 import os
-
 from datetime import timedelta
 
 from dotenv import load_dotenv
 
-from api.routes import app
+from api import app
 from api.utils import get_mongo_collection
-
 
 load_dotenv()
 
