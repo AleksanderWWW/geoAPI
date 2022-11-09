@@ -32,8 +32,8 @@ def fetch_ip_data(ip: str, ip_stack_key: str) -> Dict[str, Any]:
 
     :param ip: ip address of interest
     :type ip: str
-    :param ip_stack_key: api key neccessary to access ipstack API
-    :type ip_stack key: str
+    :param ip_stack_key: api key necessary to access ipstack API
+    :type ip_stack_key: str
 
     :return: json response from ipstack API
     :rtype: dict
@@ -53,7 +53,7 @@ def verify_user(username: str, password: str, users: Collection) -> bool:
     res = users.find(query)
     try:
         user = res.next()
-    except StopIteration:  # wrong user name
+    except StopIteration:  # wrong username
         return False
 
     if user["password"] == password:
@@ -70,7 +70,7 @@ def retrieve_ip_data(ip: str, collection: Collection) -> Dict[str, Any]:
     try:
         data = res.next()
         return data
-    except StopIteration:  # no result in data base
+    except StopIteration:  # no result in database
         return {}
 
 
