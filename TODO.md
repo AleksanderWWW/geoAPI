@@ -31,5 +31,3 @@ Tasks to be done as well as those completed in the development process
 [x] Create flask app
 
 ---
-
-

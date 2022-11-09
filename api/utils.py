@@ -1,17 +1,18 @@
-from typing import Dict, Any, Tuple
+from typing import (
+    Any,
+    Dict,
+    Tuple,
+)
 
 import pymongo
-
+import requests
+from flask import Request
+from pymongo.collection import Collection
 from pymongo.errors import (
+    CollectionInvalid,
     DocumentTooLarge,
     ExecutionTimeout,
-    CollectionInvalid
 )
-from pymongo.collection import Collection
-
-from flask import Request
-
-import requests
 
 
 def parse_request(request: Request) -> str:
@@ -20,12 +21,12 @@ def parse_request(request: Request) -> str:
     elif "ip" in request.json.keys():
         ip = request.json.get("ip")
     else:
-        ip = "" 
+        ip = ""
 
     return ip
 
 
-def fetch_ip_data(ip: str, ip_stack_key:str) -> Dict[str, Any]:
+def fetch_ip_data(ip: str, ip_stack_key: str) -> Dict[str, Any]:
     """
     Fetches json response from ipstack API about a particular ip address
 
@@ -53,8 +54,8 @@ def verify_user(username: str, password: str, users: Collection) -> bool:
     try:
         user = res.next()
     except StopIteration:  # wrong user name
-        return False 
-    
+        return False
+
     if user["password"] == password:
         return True
 
@@ -94,7 +95,7 @@ def save_ip_data(data: Dict[str, Any], collection: Collection) -> Tuple[Dict[str
         except CollectionInvalid:
             response["msg"] = "Chosen collection is invalid"
             code = 404
-    
+
     return response, code
 
 

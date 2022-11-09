@@ -1,20 +1,22 @@
-from flask import Flask, jsonify, request
-
+from flask import (
+    Flask,
+    jsonify,
+    request,
+)
 from flask_jwt_extended import (
+    JWTManager,
     create_access_token,
     jwt_required,
-    JWTManager
 )
 
 from api.utils import (
-    verify_user,
-    parse_request, 
-    fetch_ip_data, 
-    save_ip_data,
+    delete_ip_data,
+    fetch_ip_data,
+    parse_request,
     retrieve_ip_data,
-    delete_ip_data 
-    )
-
+    save_ip_data,
+    verify_user,
+)
 
 app = Flask(__name__)
 
@@ -30,10 +32,8 @@ def create_token():
     if verification_flag:
         access_token = create_access_token(username)
         return jsonify(access_token=access_token), 200
-    
-    resp_body = {
-        "msg": "Bad username or password"
-    }
+
+    resp_body = {"msg": "Bad username or password"}
 
     return jsonify(resp_body), 401
 
@@ -71,7 +71,7 @@ def get_geo_data():
 
     if data:
         code = 200
-    
+
     else:
         code = 404
 

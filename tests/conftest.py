@@ -5,9 +5,11 @@ from api import app
 
 @pytest.fixture
 def myapp():
-    app.config.update({
-        "TESTING": True,
-    })
+    app.config.update(
+        {
+            "TESTING": True,
+        }
+    )
 
     # other setup can go here
 
