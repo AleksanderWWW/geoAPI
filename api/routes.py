@@ -9,7 +9,7 @@ from flask_jwt_extended import (
     jwt_required,
 )
 
-from api.utils import (
+from services.model import (
     delete_ip_data,
     fetch_ip_data,
     parse_request,

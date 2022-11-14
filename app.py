@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv
 
 from api import app
-from api.utils import get_mongo_collection
+
+from geo_api_utils import get_mongo_collection
 from constants import JWT_TOKEN_EXPIRY_TIME_INTERVAL
 
 load_dotenv()
