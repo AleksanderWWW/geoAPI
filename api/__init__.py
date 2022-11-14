@@ -1,5 +1,5 @@
-from api.routes import app
+from api.routes import get_app
 
 __all__ = [
-    "app",
+    "get_app",
 ]
