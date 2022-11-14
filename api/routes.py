@@ -5,7 +5,6 @@ from flask import (
     jsonify,
     request,
 )
-
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
@@ -13,20 +12,17 @@ from flask_jwt_extended import (
 )
 
 from adapters.repository import AbstractNoSQLRepository
-
+from api.backend import (
+    fetch_ip_data,
+    parse_request,
+)
+from api.constants import JWT_TOKEN_EXPIRY_TIME_INTERVAL
 from services.model import (
     delete_ip_data,
     retrieve_ip_data,
     save_ip_data,
     verify_user,
 )
-
-from api.backend import (
-    fetch_ip_data,
-    parse_request,
-)
-
-from api.constants import JWT_TOKEN_EXPIRY_TIME_INTERVAL
 
 
 def get_app(
@@ -40,8 +36,7 @@ def get_app(
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = JWT_TOKEN_EXPIRY_TIME_INTERVAL
     app.config["IP_STACK_KEY"] = os.environ["IP_STACK_KEY"]
 
-    jwt = JWTManager(app)
-
+    JWTManager(app)
 
     @app.route("/token", methods=["POST"])
     def create_token():
@@ -57,11 +52,9 @@ def get_app(
 
         return jsonify(resp_body), 401
 
-
     @app.route("/status")
     def status():
         return jsonify({"status": "ok"}), 200
-
 
     @app.route("/api/add", methods=["POST"])
     @jwt_required()
@@ -77,7 +70,6 @@ def get_app(
         resp, code = save_ip_data(ip_repo, data)
 
         return jsonify(resp), code
-
 
     @app.route("/api/retrieve", methods=["GET"])
     @jwt_required()
@@ -96,7 +88,6 @@ def get_app(
             code = 404
 
         return jsonify(data), code
-
 
     @app.route("/api/delete", methods=["DELETE"])
     @jwt_required()

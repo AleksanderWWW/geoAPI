@@ -39,7 +39,7 @@ def retrieve_ip_data(repo: AbstractNoSQLRepository, ip: str) -> Dict[str, Any]:
 
 def save_ip_data(repo: AbstractNoSQLRepository, data: Dict[str, Any]) -> Tuple[Dict[str, str], int]:
     response = {"msg": ""}
-    
+
     try:
         repo.save_data(data)
         response["msg"] = "Insertion successful"
